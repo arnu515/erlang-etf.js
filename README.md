@@ -57,3 +57,7 @@ Lists are returned as an object of the `List` class. All list elements should be
 ## Tuples
 
 Tuples are returned as an object of the `Tuple` class. All tuple elements should be of a supported type.
+
+## Maps
+
+Maps are returned as JavaScript [`Map`s](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).

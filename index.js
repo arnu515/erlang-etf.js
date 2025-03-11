@@ -41,6 +41,8 @@ export const LIST_EXT = 108
 export const SMALL_TUPLE_EXT = 104
 /** Tuples. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#large_tuple_ext */
 export const LARGE_TUPLE_EXT = 105
+/** Maps. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#map_ext */
+export const MAP_EXT = 116
 
 /**
  * Uncompresses a compressed ETF binary
@@ -204,6 +206,19 @@ function parse(etfBin, i) {
         arr[j] = el
       }
       return [new Tuple(arr), i]
+    }
+    case MAP_EXT: {
+      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      i += 5;
+      const map = new Map()
+      for (let j = 0; j < len; j++) {
+        const [k, di] = parse(etfBin.slice(i), 0)
+        i += di
+        const [v, di2] = parse(etfBin.slice(i), 0)
+        i += di2
+        map.set(k, v)
+      }
+      return [map, i]
     }
     default: {
       const e = new Error("The binary is not ETF encoded.")
