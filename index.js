@@ -57,7 +57,7 @@ export async function uncompress(etfBin) {
     e.name = ERROR_NOTETF
     throw e
   }
-  const uncompressedSize = new Uint32Array(etfBin.buffer.slice(2, 6))[0]
+  const uncompressedSize = new DataView(etfBin.buffer, 2, 4).getUint32(0, false)
   const buf = await inflate(etfBin.slice(6))
   if (buf.byteLength !== uncompressedSize) {
     const e = new Error("The uncompressed binary's size does not match the expected size")
