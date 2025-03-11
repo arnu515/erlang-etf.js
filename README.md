@@ -49,3 +49,11 @@ Also, the older `FLOAT_EXT` format is implemented for version `131`, but this ma
 
 Atoms are returned as an object of the `Atom` class. The `ATOM_EXT` and `SMALL_ATOM_EXT` parsers don't actually check if the
 atom encoding is `latin-1` or not. The (codepoint) length of the atom is checked, however (max = 255).
+
+## Lists
+
+Lists are returned as an object of the `List` class. All list elements should be of a supported type, including the tail. 
+
+## Tuples
+
+Tuples are returned as an object of the `Tuple` class. All tuple elements should be of a supported type.

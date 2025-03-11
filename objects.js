@@ -16,3 +16,31 @@ export class Atom {
     return this.inner
   }
 }
+
+export class List {
+  /** @type Array */
+  inner
+  /** @type boolean */
+  proper
+  /** @type any */
+  tail
+
+  constructor(inner, tail) {
+    this.inner = inner
+    this.tail = tail
+    this.proper = Array.isArray(tail) && tail.length === 0
+  }
+}
+
+export class Tuple {
+  /** @type Array */
+  inner
+
+  get length() {
+    return this.inner.length
+  }
+
+  constructor(inner) {
+    this.inner = inner
+  }
+}

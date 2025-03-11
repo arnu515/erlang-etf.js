@@ -1,6 +1,6 @@
 // @ts-check
 
-import { Atom } from "./objects"
+import { Atom, List, Tuple } from "./objects"
 import { inflate } from "./zlib"
 
 export const ERROR_NOTETF = "ERROR_NOTETF"
@@ -27,7 +27,7 @@ export const NEW_FLOAT_EXT = 70
 export const SMALL_ATOM_EXT = 115
 /** Atom (latin-1). Deprecated but still in use. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#atom_ext */
 export const ATOM_EXT = 100
-/** Small Atom (utf-8). https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#small_atom_utf8_ext */
+/** Small Atom (utf-8) (<256 bytes). https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#small_atom_utf8_ext */
 export const SMALL_ATOM_UTF8_EXT = 119
 /** Atom (utf-8). https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#atom_utf8_ext */
 export const ATOM_UTF8_EXT = 118
@@ -35,6 +35,12 @@ export const ATOM_UTF8_EXT = 118
 export const NIL_EXT = 106
 /** Charlists. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#string_ext */
 export const STRING_EXT = 107
+/** Lists. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#list_ext */
+export const LIST_EXT = 108
+/** Small Tuples (<256 el). https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#small_tuple_ext */
+export const SMALL_TUPLE_EXT = 104
+/** Tuples. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#large_tuple_ext */
+export const LARGE_TUPLE_EXT = 105
 
 /**
  * Uncompresses a compressed ETF binary
@@ -81,7 +87,7 @@ export async function convert(etfBin) {
     // compressed
     etfBin = await uncompress(etfBin)
   }
-  return parse(etfBin.slice(1), 0)
+  return parse(etfBin.slice(1), 0)[0]
 }
 
 /**
@@ -89,23 +95,24 @@ export async function convert(etfBin) {
  *
  * @param {Uint8Array} etfBin
  * @param {number} i
+ * @returns {[any, number]}
 */
 function parse(etfBin, i) {
   switch (etfBin[i]) {
     case SMALL_INTEGER_EXT:
       i++
-      return etfBin[i++]
+      return [etfBin[i++], i]
     case INTEGER_EXT: 
       i += 5
-      return new DataView(etfBin.buffer, i-4, 4).getInt32(0, false)
+      return [new DataView(etfBin.buffer, i-4, 4).getInt32(0, false), i]
     // this probably shouldn't exist
     case FLOAT_EXT:
       i += 32
       // i and not i+1 because the last byte is the null terminator ('\0')
-      return Number(String.fromCharCode(...etfBin.slice(i-31, i)))
+      return [Number(String.fromCharCode(...etfBin.slice(i-31, i))), i]
     case NEW_FLOAT_EXT: {
       i += 9
-      return new DataView(etfBin.buffer, i-8, 8).getFloat64(0, false)
+      return [new DataView(etfBin.buffer, i-8, 8).getFloat64(0, false), i]
     }
     case SMALL_BIG_EXT: {
       let num = 0n
@@ -115,9 +122,9 @@ function parse(etfBin, i) {
       })
       if (etfBin[i+1]) num = -num
       i += 1 + len
-      return (num >= BigInt(Number.MIN_SAFE_INTEGER) && num <= BigInt(Number.MAX_SAFE_INTEGER))
+      return [(num >= BigInt(Number.MIN_SAFE_INTEGER) && num <= BigInt(Number.MAX_SAFE_INTEGER))
         ? Number(num)
-        : num
+        : num, i]
     }
     case LARGE_BIG_EXT: {
       let num = 0n
@@ -127,9 +134,9 @@ function parse(etfBin, i) {
       })
       if (etfBin[i+5]) num = -num
       i += 5 + len
-      return (num >= BigInt(Number.MIN_SAFE_INTEGER) && num <= BigInt(Number.MAX_SAFE_INTEGER))
+      return [(num >= BigInt(Number.MIN_SAFE_INTEGER) && num <= BigInt(Number.MAX_SAFE_INTEGER))
         ? Number(num)
-        : num
+        : num, i]
     }
     case SMALL_ATOM_EXT:
     case SMALL_ATOM_UTF8_EXT: {
@@ -141,7 +148,7 @@ function parse(etfBin, i) {
         e.name = ERROR_ATOM_LENGTH_INVALID
         throw e
       }
-      return atom;
+      return [atom, i];
     }
     case ATOM_EXT:
     case ATOM_UTF8_EXT: {
@@ -153,15 +160,50 @@ function parse(etfBin, i) {
         e.name = ERROR_ATOM_LENGTH_INVALID
         throw e
       }
-      return atom;
+      return [atom, i];
     }
     case NIL_EXT: 
       i++;
-      return [];
+      return [[], i];
     case STRING_EXT: {
       const len = new DataView(etfBin.buffer, i+1, 2).getUint16(0, false);
       i += 3 + len;
-      return etfBin.slice(i-len, i)
+      return [etfBin.slice(i-len, i), i]
+    }
+    case LIST_EXT: {
+      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      i += 5;
+      const arr = new Array(len)
+      for (let j = 0; j < len; j++) {
+        const [el, di] = parse(etfBin.slice(i), 0)
+        i += di
+        arr[j] = el
+      }
+      const [tail, di] = parse(etfBin.slice(i), 0)
+      i += di
+      return [new List(arr, tail), i]
+    }
+    case SMALL_TUPLE_EXT: {
+      const len = etfBin[i+1];
+      i += 2;
+      const arr = new Array(len)
+      for (let j = 0; j < len; j++) {
+        const [el, di] = parse(etfBin.slice(i), 0)
+        i += di
+        arr[j] = el
+      }
+      return [new Tuple(arr), i]
+    }
+    case LARGE_TUPLE_EXT: {
+      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      i += 5;
+      const arr = new Array(len)
+      for (let j = 0; j < len; j++) {
+        const [el, di] = parse(etfBin.slice(i), 0)
+        i += di
+        arr[j] = el
+      }
+      return [new Tuple(arr), i]
     }
     default: {
       const e = new Error("The binary is not ETF encoded.")
