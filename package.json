@@ -1,0 +1,10 @@
+{
+  "name": "erlang-etf",
+  "description": "Convert erlang External Term Format encoded binaries to respective JS types",
+  "module": "index.js",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "^1.2.5",
+    "pako": "^2.1.0"
+  }
+}
