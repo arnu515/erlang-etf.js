@@ -43,3 +43,8 @@ test("charlists", async () => {
   expect(await convert(new Uint8Array([131, 106]))).toEqual([])  
   expect(await convert(new Uint8Array([131, 107, 0, 3, 1, 2, 3]))).toEqual(new Uint8Array([1, 2, 3])) 
 })
+
+test("binaries", async () => {
+  expect(await convert(new Uint8Array([131,109,0,0,0,3,1,2,3]))).toEqual(new Uint8Array([1,2,3]))
+  expect(await convert(new Uint8Array([131,109,0,0,0,0]))).toEqual(new Uint8Array([]))
+})
