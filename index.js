@@ -1,6 +1,6 @@
 // @ts-check
 
-import { Atom, List, NonByteAlignedBinary, Tuple } from "./objects"
+import { Atom, Charlist, List, NonByteAlignedBinary, Tuple } from "./objects"
 import { inflate } from "./zlib"
 
 export const ERROR_NOTETF = "ERROR_NOTETF"
@@ -174,7 +174,7 @@ function parse(etfBin, i) {
     case STRING_EXT: {
       const len = new DataView(etfBin.buffer, i+1, 2).getUint16(0, false);
       i += 3 + len;
-      return [etfBin.slice(i-len, i), i]
+      return [new Charlist(etfBin.buffer.slice(i-len, i)), i]
     }
     case LIST_EXT: {
       const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);

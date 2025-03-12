@@ -17,6 +17,12 @@ export class Atom {
   }
 }
 
+export class Charlist extends Uint8Array {
+  constructor(...args) {
+    super(args)
+  }
+}
+
 export class List {
   /** @type Array */
   inner
