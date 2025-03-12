@@ -1,8 +1,10 @@
 // @ts-check
 
 import { Atom, Charlist, List, NonByteAlignedBinary, Tuple } from "./objects"
-import { inflate } from "./zlib"
+import { inflate, ERROR_PAKO_NOT_INSTALLED } from "./zlib"
 
+export * from "./objects"
+export { ERROR_PAKO_NOT_INSTALLED }
 export const ERROR_NOTETF = "ERROR_NOTETF"
 export const ERROR_INVALID = "ERROR_INVALID"
 export const ERROR_ATOM_LENGTH_INVALID = "ERROR_ATOM_LENGTH_INVALID"
@@ -108,25 +110,25 @@ function parse(etfBin, i) {
     case SMALL_INTEGER_EXT:
       i++
       return [etfBin[i++], i]
-    case INTEGER_EXT: 
+    case INTEGER_EXT:
       i += 5
-      return [new DataView(etfBin.buffer, i-4, 4).getInt32(0, false), i]
+      return [new DataView(etfBin.buffer, i - 4, 4).getInt32(0, false), i]
     // this probably shouldn't exist
     case FLOAT_EXT:
       i += 32
       // i and not i+1 because the last byte is the null terminator ('\0')
-      return [Number(String.fromCharCode(...etfBin.slice(i-31, i))), i]
+      return [Number(String.fromCharCode(...etfBin.slice(i - 31, i))), i]
     case NEW_FLOAT_EXT: {
       i += 9
-      return [new DataView(etfBin.buffer, i-8, 8).getFloat64(0, false), i]
+      return [new DataView(etfBin.buffer, i - 8, 8).getFloat64(0, false), i]
     }
     case SMALL_BIG_EXT: {
       let num = 0n
       const len = etfBin[++i]
-      etfBin.slice(i+2, i+2+len).forEach((v, j) => {
-        num |= BigInt(v) << 8n*BigInt(j)
+      etfBin.slice(i + 2, i + 2 + len).forEach((v, j) => {
+        num |= BigInt(v) << 8n * BigInt(j)
       })
-      if (etfBin[i+1]) num = -num
+      if (etfBin[i + 1]) num = -num
       i += 1 + len
       return [(num >= BigInt(Number.MIN_SAFE_INTEGER) && num <= BigInt(Number.MAX_SAFE_INTEGER))
         ? Number(num)
@@ -134,11 +136,11 @@ function parse(etfBin, i) {
     }
     case LARGE_BIG_EXT: {
       let num = 0n
-      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false)
-      etfBin.slice(i+6, i+6+len).forEach((v, j) => {
-        num |= BigInt(v) << 8n*BigInt(j)
+      const len = new DataView(etfBin.buffer, i + 1, 4).getUint32(0, false)
+      etfBin.slice(i + 6, i + 6 + len).forEach((v, j) => {
+        num |= BigInt(v) << 8n * BigInt(j)
       })
-      if (etfBin[i+5]) num = -num
+      if (etfBin[i + 5]) num = -num
       i += 5 + len
       return [(num >= BigInt(Number.MIN_SAFE_INTEGER) && num <= BigInt(Number.MAX_SAFE_INTEGER))
         ? Number(num)
@@ -146,8 +148,8 @@ function parse(etfBin, i) {
     }
     case SMALL_ATOM_EXT:
     case SMALL_ATOM_UTF8_EXT: {
-      const len = etfBin[i+1];
-      const atom = new Atom(new TextDecoder().decode(etfBin.slice(i+2, i+2+len)))
+      const len = etfBin[i + 1];
+      const atom = new Atom(new TextDecoder().decode(etfBin.slice(i + 2, i + 2 + len)))
       i += 2 + len;
       if (atom.length >= 256) {
         const e = new Error("Invalid atom length")
@@ -158,8 +160,8 @@ function parse(etfBin, i) {
     }
     case ATOM_EXT:
     case ATOM_UTF8_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 2).getUint16(0, false);
-      const atom = new Atom(new TextDecoder().decode(etfBin.slice(i+3, i+3+len)))
+      const len = new DataView(etfBin.buffer, i + 1, 2).getUint16(0, false);
+      const atom = new Atom(new TextDecoder().decode(etfBin.slice(i + 3, i + 3 + len)))
       i += 3 + len;
       if (atom.length >= 256) {
         const e = new Error("Invalid atom length")
@@ -168,16 +170,16 @@ function parse(etfBin, i) {
       }
       return [atom, i];
     }
-    case NIL_EXT: 
+    case NIL_EXT:
       i++;
       return [[], i];
     case STRING_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 2).getUint16(0, false);
+      const len = new DataView(etfBin.buffer, i + 1, 2).getUint16(0, false);
       i += 3 + len;
-      return [new Charlist(etfBin.buffer.slice(i-len, i)), i]
+      return [new Charlist(etfBin.buffer.slice(i - len, i)), i]
     }
     case LIST_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      const len = new DataView(etfBin.buffer, i + 1, 4).getUint32(0, false);
       i += 5;
       const arr = new Array(len)
       for (let j = 0; j < len; j++) {
@@ -190,7 +192,7 @@ function parse(etfBin, i) {
       return [new List(arr, tail), i]
     }
     case SMALL_TUPLE_EXT: {
-      const len = etfBin[i+1];
+      const len = etfBin[i + 1];
       i += 2;
       const arr = new Array(len)
       for (let j = 0; j < len; j++) {
@@ -201,7 +203,7 @@ function parse(etfBin, i) {
       return [new Tuple(arr), i]
     }
     case LARGE_TUPLE_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      const len = new DataView(etfBin.buffer, i + 1, 4).getUint32(0, false);
       i += 5;
       const arr = new Array(len)
       for (let j = 0; j < len; j++) {
@@ -212,7 +214,7 @@ function parse(etfBin, i) {
       return [new Tuple(arr), i]
     }
     case MAP_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      const len = new DataView(etfBin.buffer, i + 1, 4).getUint32(0, false);
       i += 5;
       const map = new Map()
       for (let j = 0; j < len; j++) {
@@ -225,18 +227,18 @@ function parse(etfBin, i) {
       return [map, i]
     }
     case BINARY_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      const len = new DataView(etfBin.buffer, i + 1, 4).getUint32(0, false);
       i += 5 + len;
-      return [new Uint8Array(etfBin.buffer, i-len, len), i]
+      return [new Uint8Array(etfBin.buffer, i - len, len), i]
     }
     case BIT_BINARY_EXT: {
-      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
-      const bits = etfBin[i+5];
+      const len = new DataView(etfBin.buffer, i + 1, 4).getUint32(0, false);
+      const bits = etfBin[i + 5];
       i += 6 + len;
-      const binb = etfBin[i-1];
+      const binb = etfBin[i - 1];
       const nbab = new NonByteAlignedBinary(binb, len)
-      nbab.set(etfBin.slice(i-len, i-1), 0)
-      nbab[len-1] = binb >> (8-bits)
+      nbab.set(etfBin.slice(i - len, i - 1), 0)
+      nbab[len - 1] = binb >> (8 - bits)
       return [nbab, i]
     }
     default: {
