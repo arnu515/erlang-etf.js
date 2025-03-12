@@ -107,13 +107,20 @@ returned as [`BigInt`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/R
 
 ## Charlists
 
-Erlang charlists are returned as `Uint8Array`s, not strings. This is done since all lists with uint8 elements are converted to
-`STRING_EXT` by the ETF. Hence, only the lists that are *certain* to be strings should actually be converted to a string.
+Erlang charlists are returned as `Charlist`s, which are an extension of `Uint8Arrays`, not strings. This is done since
+all lists with uint8 elements are converted to `STRING_EXT` by the ETF. Hence, only the lists that are *certain* to be
+strings should actually be converted to a string.
 This library leaves that decision to the user. Lists with non-uint8 elements are represented with `LIST_EXT` by the ETF.
 
 If you want the list to be forcefully converted to a string, you should use
 [`String.fromCodePoint`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/fromCodePoint) on
 the list (spread the list args like so: `String.fromCodePoint(...myList)`).
+
+## Binaries
+
+Byte-aligned binaries are converted to `Uint8Array`s. Non-byte aligned binaries are represented with the `NonByteAlignedBinary`
+class, an extension of a `Uint8Array`, with a property called `bitsInLastByte` that denotes the number of bits
+(counted from the right -- least to most significant) of the last `uint8` in the array to be considered.
 
 ## Floats
 
