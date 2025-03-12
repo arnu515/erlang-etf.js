@@ -44,3 +44,13 @@ export class Tuple {
     this.inner = inner
   }
 }
+
+export class NonByteAlignedBinary extends Uint8Array {
+  /** @type number */
+  bitsInLastByte
+  
+  constructor(binb, ...args) {
+    super(...args)
+    this.bitsInLastByte = binb
+  }
+}

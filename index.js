@@ -1,6 +1,6 @@
 // @ts-check
 
-import { Atom, List, Tuple } from "./objects"
+import { Atom, List, NonByteAlignedBinary, Tuple } from "./objects"
 import { inflate } from "./zlib"
 
 export const ERROR_NOTETF = "ERROR_NOTETF"
@@ -45,6 +45,8 @@ export const LARGE_TUPLE_EXT = 105
 export const MAP_EXT = 116
 /** Binaries. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#binary_ext */
 export const BINARY_EXT = 109
+/** Non-byte aligned binaries. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#bit_binary_ext */
+export const BIT_BINARY_EXT = 77
 
 /**
  * Uncompresses a compressed ETF binary
@@ -226,6 +228,16 @@ function parse(etfBin, i) {
       const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
       i += 5 + len;
       return [new Uint8Array(etfBin.buffer, i-len, len), i]
+    }
+    case BIT_BINARY_EXT: {
+      const len = new DataView(etfBin.buffer, i+1, 4).getUint32(0, false);
+      const bits = etfBin[i+5];
+      i += 6 + len;
+      const binb = etfBin[i-1];
+      const nbab = new NonByteAlignedBinary(binb, len)
+      nbab.set(etfBin.slice(i-len, i-1), 0)
+      nbab[len-1] = binb >> (8-bits)
+      return [nbab, i]
     }
     default: {
       const e = new Error("The binary is not ETF encoded.")
