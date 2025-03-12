@@ -19,7 +19,7 @@ export const INTEGER_EXT = 98
 export const SMALL_BIG_EXT = 110
 /** Bigint upto 255 bytes (le). https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#large_big_ext */
 export const LARGE_BIG_EXT = 111
-/** @deprecated may be removed soon. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#float_ext */
+/** Minor version 0 floating point repr. https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#float_ext */
 export const FLOAT_EXT = 99
 /** 64-bit finite floating point (be). https://www.erlang.org/docs/28/apps/erts/erl_ext_dist#new_float_ext */
 export const NEW_FLOAT_EXT = 70

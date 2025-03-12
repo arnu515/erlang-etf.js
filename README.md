@@ -119,8 +119,6 @@ the list (spread the list args like so: `String.fromCodePoint(...myList)`).
 
 The Erlang floating point implementation does not support `±Inf` or `NaN`. However, this library does not handle that (for conversion to JS).
 
-Also, the older `FLOAT_EXT` format is implemented for version `131`, but this may change.
-
 ## Atoms
 
 Atoms are returned as an object of the `Atom` class. The `ATOM_EXT` and `SMALL_ATOM_EXT` parsers don't actually check if the
