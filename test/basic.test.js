@@ -2,7 +2,7 @@
 
 import {test, expect} from "bun:test"
 import {convert} from ".."
-import { Atom, NonByteAlignedBinary } from "../objects"
+import { Atom, Charlist, NonByteAlignedBinary } from "../objects"
 
 test("integers", async () => {
   const arr = new Array(255).fill(255)
@@ -41,7 +41,7 @@ test("atoms", async () => {
 
 test("charlists", async () => {
   expect(await convert(new Uint8Array([131, 106]))).toEqual([])  
-  expect(await convert(new Uint8Array([131, 107, 0, 3, 1, 2, 3]))).toEqual(new Uint8Array([1, 2, 3])) 
+  expect(await convert(new Uint8Array([131, 107, 0, 3, 1, 2, 3]))).toEqual(new Charlist(new Uint8Array([1, 2, 3]))) 
 })
 
 test("binaries", async () => {

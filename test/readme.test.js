@@ -2,7 +2,7 @@
 
 import { convert } from ".."
 import { expect, test } from "bun:test"
-import { Tuple, List, Atom } from "../objects"
+import { Tuple, List, Atom, Charlist } from "../objects"
 
 test("first example", async () => {
   const bin = new Uint8Array([
@@ -18,7 +18,7 @@ test("first example", async () => {
         new Atom("tuples"),
         // the second element in list's the constructor is the tail
         new List([new Atom("lists")], []),
-        new Uint8Array([115, 116, 114, 105, 110, 103, 115]),
+        new Charlist(new Uint8Array([115, 116, 114, 105, 110, 103, 115])),
         1, 2,
         new Map([[new Atom("and"), new Atom("more!")]])
       ])
@@ -29,5 +29,5 @@ test("compression example", async () => {
   const bin = new Uint8Array([ 131,80,0,0,3,235,120,156,203,102,126,193,56,10,70,193, 40,24,246,0,0,225,210,5,63 ])
 
   expect(await convert(bin))
-    .toEqual(new Uint8Array(1000).fill(1))
+    .toEqual(new Charlist(new Uint8Array(1000).fill(1)))
 })

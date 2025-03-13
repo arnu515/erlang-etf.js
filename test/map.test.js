@@ -2,7 +2,7 @@
 
 import { test, expect } from "bun:test"
 import { convert } from ".."
-import { List, Tuple } from "../objects"
+import { Charlist, List, Tuple } from "../objects"
 
 test("Basic", async () => {
   expect(await convert(new Uint8Array([131, 116, 0, 0, 0, 0]))).toEqual(new Map())
@@ -13,7 +13,7 @@ test("Basic", async () => {
     // @ts-ignore
   ]))).toEqual(new Map([
     [1, new Tuple([1, 2, 3])],
-    [4, new Uint8Array([5, 6, 7])],
+    [4, new Charlist(new Uint8Array([5, 6, 7]))],
     [8, new List([9], 10)]
   ]))
 })
