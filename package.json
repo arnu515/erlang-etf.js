@@ -8,7 +8,7 @@
     "index.js",
     "objects.js",
     "zlib.js",
-    "index.d.ts",
+    "index.d.ts"
   ],
   "type": "module",
   "devDependencies": {
