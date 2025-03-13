@@ -78,7 +78,7 @@ declare module "erlang-etf" {
    *
    * Returns a valid ETF binary
    */
-  export function uncompress(etfBin: Uint8Array): Promise<Uint8Array>
+  export function uncompress(etfBin: Uint8Array, opts?: InflateOpts): Promise<Uint8Array>
   /**
    * This function attepts to convert an ETF encoded binary into a javascript
    * object. Please see the library README for more details on how to conversion
@@ -86,7 +86,7 @@ declare module "erlang-etf" {
    * 
    * It returns the decoded object, and position at which it stopped (exclusive).
    */
-  export function convert<T>(etfBin: Uint8Array): Promise<[T, number]>
+  export function convert<T>(etfBin: Uint8Array, opts?: InflateOpts): Promise<[T, number]>
   /**
    * This function converts a non-compressed ETF binary into a JS object. If the
    * given binary is compressed, ERROR_COMPRESSED will be thrown.

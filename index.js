@@ -84,7 +84,7 @@ export async function uncompress(etfBin, opts) {
  * 
  * @param {Uint8Array} etfBin The array to convert 
  */
-export async function convert(etfBin) {
+export async function convert(etfBin, opts) {
   if (!(etfBin instanceof Uint8Array))
     throw new TypeError("Expected first argument to be a Uint8Array.")
   if (etfBin[0] !== ETF) {
@@ -94,7 +94,7 @@ export async function convert(etfBin) {
   }
   if (etfBin[1] === COMPRESSED) {
     // compressed
-    etfBin = await uncompress(etfBin)
+    etfBin = await uncompress(etfBin, opts)
   }
   return parse(etfBin.slice(1), 0)[0]
 }
