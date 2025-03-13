@@ -56,7 +56,7 @@ export const BIT_BINARY_EXT = 77
  * 
  * @param {Uint8Array} etfBin The array to convert 
  */
-export async function uncompress(etfBin) {
+export async function uncompress(etfBin, opts) {
   if (!(etfBin instanceof Uint8Array))
     throw new TypeError("Expected first argument to be a Uint8Array.")
   if (etfBin[0] !== ETF || etfBin[1] !== COMPRESSED) {
@@ -65,7 +65,7 @@ export async function uncompress(etfBin) {
     throw e
   }
   const uncompressedSize = new DataView(etfBin.buffer, 2, 4).getUint32(0, false)
-  const buf = await inflate(etfBin.slice(6))
+  const buf = await inflate(etfBin.slice(6), opts)
   if (buf.byteLength !== uncompressedSize) {
     const e = new Error("The uncompressed binary's size does not match the expected size")
     e.name = ERROR_INVALID
