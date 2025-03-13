@@ -17,10 +17,8 @@ pub type BigInt
 fn bigint(a1: a) -> BigInt
 
 fn runner(in: BitArray, decoder: decode.Decoder(a), out: a) {
-  use res <- promise.await(etf_js.to_dynamic(in))
+  use res <- promise.await(etf_js.decode(in, decoder))
   should.be_ok(res)
-  |> decode.run(decoder)
-  |> should.be_ok
   |> should.equal(out)
 
   promise.resolve(Nil)
@@ -185,15 +183,12 @@ pub fn sans_promises_test() {
   ]
 
   list.map(ints, fn(i) {
-    etf_js.to_dynamic_no_compression(i.0)
-    |> should.be_ok
-    |> decode.run(decode.int)
+    etf_js.decode_non_compressed(i.0, decode.int)
     |> should.equal(i.1)
   })
   list.map(bigints, fn(i) {
-    etf_js.to_dynamic_no_compression(i.0)
-    |> should.be_ok
-    |> decode.run(decode.new_primitive_decoder("BigInt", parse_bigint))
+    decode.new_primitive_decoder("BigInt", parse_bigint)
+    |> etf_js.decode_non_compressed(i.0, _)
     |> should.equal(i.1)
   })
 
