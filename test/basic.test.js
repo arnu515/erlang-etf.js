@@ -49,6 +49,11 @@ test("binaries", async () => {
   expect(await convert(new Uint8Array([131,109,0,0,0,0]))).toEqual(new Uint8Array([]))
 })
 
+test("booleans", async () => {
+  expect(await convert(new Uint8Array([131, 119, 4, 116, 114, 117, 101]))).toEqual(true)
+  expect(await convert(new Uint8Array([131, 119, 5, 102, 97, 108, 115, 101]))).toEqual(false)
+})
+
 test("non-byte aligned binaries", async () => {
   // <<1:1, 2:2, 3:3, 4:4>>
   expect(await convert(new Uint8Array([131,77,0,0,0,2,2,205,0]))).toEqual(new NonByteAlignedBinary(2, [205, 0]))

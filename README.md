@@ -131,6 +131,8 @@ The Erlang floating point implementation does not support `±Inf` or `NaN`. Howe
 Atoms are returned as an object of the `Atom` class. The `ATOM_EXT` and `SMALL_ATOM_EXT` parsers don't actually check if the
 atom encoding is `latin-1` or not. The (codepoint) length of the atom is checked, however (max = 255).
 
+The atoms `true` and `false` are returned as equivalent JS booleans.
+
 ## Lists
 
 Lists are returned as an object of the `List` class. All list elements should be of a supported type, including the tail. 

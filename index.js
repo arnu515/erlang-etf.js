@@ -156,6 +156,8 @@ function parse(etfBin, i) {
         e.name = ERROR_ATOM_LENGTH_INVALID
         throw e
       }
+      if (atom.inner === 'true') return [true, i];
+      if (atom.inner === 'false') return [false, i];
       return [atom, i];
     }
     case ATOM_EXT:
@@ -168,6 +170,10 @@ function parse(etfBin, i) {
         e.name = ERROR_ATOM_LENGTH_INVALID
         throw e
       }
+      // technically the following two cases are impossible, since `true`
+      // and `false` will be encoded as short atoms, but oh well
+      if (atom.inner === 'true') return [true, i];
+      if (atom.inner === 'false') return [false, i];
       return [atom, i];
     }
     case NIL_EXT:
