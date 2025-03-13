@@ -1,9 +1,9 @@
 // @ts-check
 
-import { Atom, Charlist, List, NonByteAlignedBinary, Tuple } from "./objects"
-import { inflate, ERROR_PAKO_NOT_INSTALLED } from "./zlib"
+import { Atom, Charlist, List, NonByteAlignedBinary, Tuple } from "./objects.js"
+import { inflate, ERROR_PAKO_NOT_INSTALLED } from "./zlib.js"
 
-export * from "./objects"
+export * from "./objects.js"
 export { ERROR_PAKO_NOT_INSTALLED }
 export const ERROR_NOTETF = "ERROR_NOTETF"
 export const ERROR_COMPRESSED = "ERROR_COMPRESSED"
