@@ -6,6 +6,7 @@ import { inflate, ERROR_PAKO_NOT_INSTALLED } from "./zlib"
 export * from "./objects"
 export { ERROR_PAKO_NOT_INSTALLED }
 export const ERROR_NOTETF = "ERROR_NOTETF"
+export const ERROR_COMPRESSED = "ERROR_COMPRESSED"
 export const ERROR_INVALID = "ERROR_INVALID"
 export const ERROR_ATOM_LENGTH_INVALID = "ERROR_ATOM_LENGTH_INVALID"
 
@@ -94,6 +95,28 @@ export async function convert(etfBin) {
   if (etfBin[1] === COMPRESSED) {
     // compressed
     etfBin = await uncompress(etfBin)
+  }
+  return parse(etfBin.slice(1), 0)[0]
+}
+
+/**
+ * This function converts a non-compressed ETF binary into a JS object. If the
+ * given binary is compressed, ERROR_COMPRESSED will be thrown.
+ *
+ * @param {Uint8Array} etfBin 
+ */
+export function convertNoCompression(etfBin) {
+  if (!(etfBin instanceof Uint8Array))
+    throw new TypeError("Expected first argument to be a Uint8Array.")
+  if (etfBin[0] !== ETF) {
+    const e = new Error("The binary is not ETF encoded.")
+    e.name = ERROR_NOTETF
+    throw e
+  }
+  if (etfBin[1] === COMPRESSED) {
+    const e = new Error("The binary is compressed.")
+    e.name = ERROR_COMPRESSED
+    throw e
   }
   return parse(etfBin.slice(1), 0)[0]
 }
