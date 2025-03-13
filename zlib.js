@@ -14,37 +14,61 @@ of zlib do not exist */
 export const ERROR_PAKO_NOT_INSTALLED = "ERROR_PAKO_NOT_INSTALLED"
 
 /**
+  @typedef InflateOpts
+  @property {'DecompressionStream' | 'node:zlib' | 'pako' | undefined} using
+*/
+
+/**
   Uncompresses a zlib binary.
   @param {Uint8Array} bin 
+  @param {InflateOpts} opts
 */
-export async function inflate(bin) {
-  if (typeof DecompressionStream !== 'undefined') {
-    console.log('using decstm')
-    return new Uint8Array(
-      await new Response(
-        new Blob([bin])
-          .stream()
-          .pipeThrough(new DecompressionStream('deflate'))
-      ).arrayBuffer()
-    )
+export async function inflate(bin, opts = { using: undefined }) {
+  let using = opts.using;
+  if (typeof using === 'undefined') {
+    if (typeof DecompressionStream !== 'undefined') using = 'DecompressionStream'
+    else {
+      let e = false
+      try {
+        await import('node:zlib')
+        using = 'node:zlib'
+      } catch(er) {
+        try {
+          await import('pako')
+          using = 'pako'
+        } catch {
+          e = true
+        }
+      }
+      if (e) {
+        const e = new Error("`pako` must be installed for zlib support")
+        e.name = ERROR_PAKO_NOT_INSTALLED
+        throw e
+      }
+    }
   }
-  try {
-    console.log('using zlib')
-    const {inflate: nodeInflate} = await import('node:zlib')
-    const {promisify} = await import('node:util')
-    const inflate = promisify(nodeInflate)
-    return new Uint8Array(await inflate(bin))
-  } catch (e) {
-    if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e
+  switch (using) {
+    case "DecompressionStream":
+      return new Uint8Array(
+        await new Response(
+          new Blob([bin])
+            .stream()
+            .pipeThrough(new DecompressionStream('deflate'))
+        ).arrayBuffer()
+      )
+    case "node:zlib": {
+      const { inflate: nodeInflate } = await import('node:zlib')
+      const { promisify } = await import('node:util')
+      const inflate = promisify(nodeInflate)
+      return new Uint8Array(await inflate(bin))
+    }
+    case "pako": {
+      const { inflate } = await import('pako')
+      return inflate(bin)
+    }
+    default:
+      const e = new Error("`pako` must be installed for zlib support")
+      e.name = ERROR_PAKO_NOT_INSTALLED
+      throw e
   }
-  try {
-    console.log('using pako')
-    const {inflate} = await import('pako')
-    return inflate(bin)
-  } catch (e) {
-    if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e
-  }
-  const e = new Error("`pako` must be installed for zlib support")
-  e.name = ERROR_PAKO_NOT_INSTALLED
-  throw e
 }
