@@ -23,7 +23,6 @@ A simple example would be:
 
 ```gleam
 import etf_js
-import etf_js/decode as etf_decode
 import gleam/decode
 import gleam/javascript/promise
 
@@ -34,7 +33,7 @@ pub fn main() {
   108,100,33>>
 
   // since ETF binaries can be compressed, promises are required
-  // to decode them. However, if you know for a fact that a certain
+  // to parse them. However, if you know for a fact that a certain
   // binary isn't compressed (hint: the second byte must *not* be 80),
   // then you can call this method, which is synchronous
   let assert Ok(term) = etf_js.to_dynamic_no_compression(bits)
@@ -44,7 +43,10 @@ pub fn main() {
   // Erlang does not have a standalone string type, but JS does, so we
   // can't use decode.string here, since that only checks for JS strings,
   // and not UTF-8 bitarrays. The `lossy_string` decoder checks for both.
-  let assert Ok("Hello, world!") = decode.run(etf_decode.lossy_string())
+  let assert Ok("Hello, world!") = decode.run(etf_js.lossy_string())
+
+  // You may also use the etf_js.decode[_no_compression] methods to parse
+  // and decode the ETF binary in one function call!
 
   // Compression! This is a list of a thousand ones!
   // to get this binary, run:

@@ -1,5 +1,4 @@
 import etf_js
-import etf_js/decode as etf_decode
 import gleam/dynamic/decode
 import gleam/javascript/promise
 import gleam/list
@@ -135,7 +134,7 @@ pub fn lists_test() {
         131, 108, 0, 0, 0, 2, 109, 0, 0, 0, 2, 104, 105, 109, 0, 0, 0, 3, 98,
         121, 101, 106,
       >>,
-      decode.list(etf_decode.loose_string()),
+      decode.list(etf_js.loose_string()),
       ["hi", "bye"],
     ),
   )
