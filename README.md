@@ -135,6 +135,8 @@ atom encoding is `latin-1` or not. The (codepoint) length of the atom is checked
 
 Lists are returned as an object of the `List` class. All list elements should be of a supported type, including the tail. 
 
+An empty Erlang list is returned as an empty array. It may be worth considering returning it as `undefined` or `null` instead.
+
 ## Tuples
 
 Tuples are returned as an object of the `Tuple` class. All tuple elements should be of a supported type.
