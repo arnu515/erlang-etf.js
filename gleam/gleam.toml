@@ -1,5 +1,5 @@
 name = "etf_js"
-version = "0.2.0"
+version = "0.1.0"
 target = "javascript"
 description = "Convert erlang ETF encoded binaries to (reasonable) JavaScript equivalents"
 licences = ["MIT"]
