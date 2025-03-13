@@ -9,6 +9,8 @@ pub type EtfDecodeError {
   Invalid
   /// An atom parsed from the binary has an invalid length (>255)
   AtomLengthInvalid
+  /// Binary is compressed but the no_compression method was called
+  Compressed
   /// The `pako` library is not installed (from npm).
   /// This error occurs if both DecompressionStream and node:zlib
   /// are not available, usually in older browsers (<May 2023).
@@ -24,3 +26,10 @@ type Ret =
 ///
 @external(javascript, "./etf_ffi.mjs", "toDynamic")
 pub fn to_dynamic(bits: BitArray) -> Promise(Ret)
+
+/// Converts an erlang ETF encoded bitarray into a JS object returned as a Dynamic.
+///
+/// This method is synchronous and does not support compressed ETF binaries.
+///
+@external(javascript, "./etf_ffi.mjs", "toDynamicNoCompression")
+pub fn to_dynamic_no_compression(bits: BitArray) -> Ret
