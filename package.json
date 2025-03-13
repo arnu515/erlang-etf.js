@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Convert erlang External Term Format encoded binaries to respective JS types",
   "module": "index.js",
+  "types": "index.d.ts",
   "files": [
     "index.js",
     "objects.js",
