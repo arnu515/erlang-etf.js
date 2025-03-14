@@ -96,3 +96,22 @@ pub fn loose_string() -> decode.Decoder(String) {
     }
   })
 }
+
+@external(javascript, "./etf_ffi.mjs", "inferTaggedTuple")
+fn infer_tagged_tuple(data: Dynamic, val: a) -> Result(a, String)
+
+/// Decodes an erlang tagged tuple into a Gleam type.
+//
+// This is useful for decoding gleam record types and
+// enum variants.
+pub fn tagged_tuple(base val: a) -> decode.Decoder(a) {
+  decode.new_primitive_decoder("TaggedTuple", fn(data) {
+    case infer_tagged_tuple(data, val) {
+      Ok(parsed) -> Ok(parsed)
+      Error(e) -> {
+        echo e
+        Error(val)
+      }
+    }
+  })
+}

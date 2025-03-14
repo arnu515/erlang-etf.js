@@ -203,3 +203,51 @@ pub fn sans_promises_test() {
   |> should.be_error
   |> should.equal(etf_js.Compressed)
 }
+
+type Person {
+  Person(name: Name, age: Int, children: List(Person), education: Education)
+}
+
+type Name {
+  Name(first: String, last: String)
+}
+
+type Education {
+  Uneducated
+  Primary
+  Secondary
+  Graduate
+  PostGraduate
+}
+
+pub fn record_type_test() {
+  let original =
+    Person(
+      name: Name(first: "John", last: "Doe"),
+      age: 20,
+      children: [
+        Person(Name(first: "Joe", last: "Doe"), 15, [], Secondary),
+        Person(Name(first: "Mama", last: "Doe"), 10, [], Primary),
+      ],
+      education: Graduate,
+    )
+  // or the equivalent in erlang:
+  // {person, {name, <<"John">>, <<"Doe">>}, 20}
+  let bits = <<
+    131, 104, 3, 119, 6, 112, 101, 114, 115, 111, 110, 104, 3, 119, 4, 110, 97,
+    109, 101, 109, 0, 0, 0, 4, 74, 111, 104, 110, 109, 0, 0, 0, 3, 68, 111, 101,
+    97, 20,
+  >>
+
+  etf_js.decode_non_compressed(
+    bits,
+    etf_js.tagged_tuple(Person(
+      Name("Something", "Else"),
+      42,
+      [Person(Name("a", "b"), 1, [], Uneducated)],
+      PostGraduate,
+    )),
+  )
+  |> should.be_ok
+  |> should.equal(original)
+}
