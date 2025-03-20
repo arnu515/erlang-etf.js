@@ -1,6 +1,6 @@
 {
   "name": "erlang-etf",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Convert erlang External Term Format encoded binaries to respective JS types",
   "module": "index.js",
   "types": "index.d.ts",
