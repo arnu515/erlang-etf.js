@@ -7,6 +7,8 @@ function normaliseData(data) {
   if (data instanceof Atom && data.inner === 'nil') return new Ok(undefined)
   // Lists
   if (data instanceof List) return new Ok(toList(data.inner, Array.isArray(data.tail) && data.tail.length === 0 ? undefined : data.tail))
+  // Tuples
+  if (data instanceof Tuple) return new Ok(data.inner)
 
   return new Ok(data)
 }
