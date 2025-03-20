@@ -203,3 +203,43 @@ pub fn sans_promises_test() {
   |> should.be_error
   |> should.equal(etf_js.Compressed)
 }
+
+pub fn tuples_test() {
+  let single = #(<<131, 104, 1, 109, 0, 0, 0, 2, 72, 105>>, #("Hi"))
+  let double = #(
+    <<
+      131, 104, 2, 109, 0, 0, 0, 7, 72, 101, 108, 108, 111, 44, 32, 109, 0, 0, 0,
+      6, 119, 111, 114, 108, 100, 33,
+    >>,
+    #("Hello, ", "world!"),
+  )
+  let different_types = #(
+    <<
+      131, 104, 4, 109, 0, 0, 0, 1, 97, 97, 10, 70, 64, 9, 30, 184, 81, 235, 133,
+      31, 119, 5, 102, 97, 108, 115, 101,
+    >>,
+    #("a", 10, 3.14, False),
+  )
+
+  etf_js.decode_non_compressed(single.0, decode.at([0], etf_js.decode_string()))
+  |> should.be_ok
+  |> should.equal("Hi")
+
+  etf_js.decode_non_compressed(double.0, {
+    use f1 <- decode.field(0, etf_js.decode_string())
+    use f2 <- decode.field(1, etf_js.decode_string())
+    decode.success(#(f1, f2))
+  })
+  |> should.be_ok
+  |> should.equal(#("Hello, ", "world!"))
+
+  etf_js.decode_non_compressed(different_types.0, {
+    use f1 <- decode.field(0, etf_js.decode_string())
+    use f2 <- decode.field(1, decode.int)
+    use f3 <- decode.field(2, decode.float)
+    use f4 <- decode.field(3, decode.bool)
+    decode.success(#(f1, f2, f3, f4))
+  })
+  |> should.be_ok
+  |> should.equal(#("a", 10, 3.14, False))
+}
