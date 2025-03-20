@@ -72,6 +72,8 @@ pub fn decode_non_compressed(
   })
 }
 
+pub const decode_string = loose_string
+
 /// Decodes both JS strings and utf-8 `BitArray`s.
 ///
 /// This is required because in Gleam's Erlang target, strings are represented as
